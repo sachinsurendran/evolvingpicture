@@ -186,9 +186,9 @@ void genome_operator::sort_gene_pool(genome *head[], int gene_pool_size)
     genome *temp_genome_ptr;
     int indx, loop_within;
 
-    for (indx = 0; indx < gene_pool_size; indx++)
+    for (indx = 0; indx < gene_pool_size/2; indx++)
     {
-        for (loop_within = 0; loop_within < gene_pool_size-1; loop_within++)
+        for (loop_within = 0; loop_within < (gene_pool_size-1); loop_within++)
         {
             if (head[loop_within]->get_fitness() > head[loop_within+1]->get_fitness())
             {
@@ -198,7 +198,7 @@ void genome_operator::sort_gene_pool(genome *head[], int gene_pool_size)
             }
         }
     }
-#define DEBUG
+//#define DEBUG
 #ifdef DEBUG
     /* Print fitness of best parent */
     printf("---------------------------------\n");
@@ -223,12 +223,19 @@ void genome_operator::pixelize(genome *some_genome)
     if (some_genome->genome_ptr) 
     {
         for (i=0; i<x; i++) {
-            indx = 0;
             for (j=0; j<y; j++){
                 //printf(" some_genome->genome_ptr[%d][%d] = %d\n", i, j, (char) (* (some_genome->genome_ptr + (x*i) + j)));
-                while(data[indx++].val != (char) (* (some_genome->genome_ptr + (x*i) + j)) )
-                {;}
-                printf("%c", data[indx-1].c);
+                indx = 0;
+                while(data[indx++].val != (char) (* (some_genome->genome_ptr + (x*i) + j)) && (indx <= MAX_CHAR) )
+                {
+                    ;
+                }
+                //printf("%02d ", indx-1);
+                if (indx == MAX_CHAR)
+                    printf("%c", data[MAX_CHAR -1].c);
+                else
+                    printf("%c", data[indx-1].c);
+
             }
             printf("\n");
         }
