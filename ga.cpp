@@ -170,54 +170,15 @@ int main() {
 	genome target_genome(im->sx, im->sy);
 	target_genome.load_from_image(im->tpixels);
 
-#define MAX_GENE_POOL 10 /* should be a multiple of 2 */
+#define MAX_GENE_POOL 20 /* should be a multiple of 2 */
 #define MAX_ITERATION 100000000
-#define MUTATE_PERCENT 5
+#define MUTATE_PERCENT 3
 
-#ifdef OLD_CODE
-	genome chld1(im->sx, im->sy);
-	genome chld2(im->sx, im->sy);
-	genome chld3(im->sx, im->sy);
-	genome chld4(im->sx, im->sy);
-        genome chld5(im->sx, im->sy);
-        genome chld6(im->sx, im->sy);
-        genome chld7(im->sx, im->sy);
-        genome chld8(im->sx, im->sy);
-        genome chld9(im->sx, im->sy);
-        genome chld10(im->sx, im->sy);
-#endif  /* OLD_CODE */
 	genome_operator g_op;
 	genome *gene_pool[MAX_GENE_POOL];
 
         g_op.create_genome_pool(gene_pool, MAX_GENE_POOL, im->sx, im->sy);
-
-
-#ifdef OLD_CODE
-        gene_pool[0] =  new genome(im->sx, im->sy);
-
-	gene_pool[0] = &chld1;
-
-	gene_pool[1] = &chld2;
-	gene_pool[2] = &chld3;
-	gene_pool[3] = &chld4;
-        gene_pool[4] = &chld5;
-        gene_pool[5] = &chld6;
-        gene_pool[6] = &chld7;
-        gene_pool[7] = &chld8;
-        gene_pool[8] = &chld9;
-        gene_pool[9] = &chld10;
-
-	/* Randomize Gene pool */
-	for (int indx = 0; indx < MAX_GENE_POOL; indx++)
-	{
-		gene_pool[indx]->randomize_genome();
-		g_op.calculate_fitness(gene_pool[indx], &target_genome);
-                g_op.pixelize(gene_pool[indx]);
-                printf("\n %d----------------------------------------------------------------------------\n\n", indx);
-
-	}
-
-#endif /* OLD_CODE */
+        
 
         //g_op.pixelize(&target_genome);
 
@@ -229,32 +190,6 @@ int main() {
 
 		/* Crossover the top 2 parents to get children genome */
                 g_op.crossover_genepool(gene_pool, MAX_GENE_POOL, MUTATE_PERCENT);
-#ifdef MANUAL_CROSSOVER
-		g_op.crossover(gene_pool[PARENT1], gene_pool[PARENT2],
-		              gene_pool[CHILD1], gene_pool[CHILD2]);
-                g_op.crossover(gene_pool[PARENT1], gene_pool[PARENT2],
-                        gene_pool[CHILD3], gene_pool[CHILD4]);
-
-                g_op.crossover(gene_pool[PARENT1], gene_pool[PARENT2],
-                        gene_pool[CHILD5], gene_pool[CHILD6]);
-                g_op.crossover(gene_pool[PARENT1], gene_pool[PARENT2],
-                        gene_pool[CHILD7], gene_pool[CHILD8]);
-
-		/* Mutate the children */
-                gene_pool[PARENT1]->mutate(0);
-                gene_pool[PARENT2]->mutate(0);
-
-
-		gene_pool[CHILD1]->mutate(MUTATE_PERCENT);
-		gene_pool[CHILD2]->mutate(MUTATE_PERCENT);
-		gene_pool[CHILD3]->mutate(MUTATE_PERCENT);
-		gene_pool[CHILD4]->mutate(MUTATE_PERCENT);
-		gene_pool[CHILD5]->mutate(MUTATE_PERCENT);
-		gene_pool[CHILD6]->mutate(MUTATE_PERCENT);
-		gene_pool[CHILD7]->mutate(MUTATE_PERCENT);
-		gene_pool[CHILD8]->mutate(MUTATE_PERCENT);
-
-#endif /* MANUAL_CROSSOVER */
 
 		/* Calculate fitness */
 		g_op.calc_fitness_of_pool(gene_pool, MAX_GENE_POOL, &target_genome);
