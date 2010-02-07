@@ -7,8 +7,9 @@
 #include "genome.h"
 
 //#define IMG_FILE "unseen.jpg"
-#define IMG_FILE "doku.jpg"
+//#define IMG_FILE "doku.jpg"
 //#define IMG_FILE "penguin-org.jpeg"
+#define IMG_FILE "sachin.jpg"
 
 
 inline char pixelize(int i) {
@@ -172,7 +173,8 @@ int main() {
 
 #define MAX_GENE_POOL 20 /* should be a multiple of 2 */
 #define MAX_ITERATION 100000000
-#define MUTATE_PERCENT 3
+        
+#define MUTATE_PERCENT  0.1099 /* Keep Mutation rate very low, this is seen to imcrease the rate of Fitness, and faster Convergence */
 
 	genome_operator g_op;
 	genome *gene_pool[MAX_GENE_POOL];
@@ -182,9 +184,10 @@ int main() {
 
         //g_op.pixelize(&target_genome);
 
-	for (int iteration = 0; iteration < MAX_ITERATION; iteration++)
+	//for (int iteration = 0; iteration < MAX_ITERATION; iteration++)
+        int iteration = 0;
+        while(1)
 	{
-
 		/* Sort pool based on fitness */
 		g_op.sort_gene_pool(gene_pool, MAX_GENE_POOL);
 
@@ -193,11 +196,14 @@ int main() {
 
 		/* Calculate fitness */
 		g_op.calc_fitness_of_pool(gene_pool, MAX_GENE_POOL, &target_genome);
-
+#define DEBUG1
 #ifdef DEBUG1
                 /* Draw the best genome every 100 cycles */
-                if ((iteration % 100) == 0)
+                if ((iteration++ % 100) == 0) {
                     g_op.pixelize(gene_pool[PARENT1]);
+                    printf("Fitness = %d\n", gene_pool[PARENT1]->get_fitness());
+                }
+
 #endif
 	}
 
