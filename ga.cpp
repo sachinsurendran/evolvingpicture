@@ -7,9 +7,9 @@
 #include "genome.h"
 
 //#define IMG_FILE "unseen.jpg"
-//#define IMG_FILE "doku.jpg"
+#define IMG_FILE "doku.jpg"
 //#define IMG_FILE "penguin-org.jpeg"
-#define IMG_FILE "sachin.jpg"
+//#define IMG_FILE "sachin.jpg"
 
 
 inline char pixelize(int i) {
