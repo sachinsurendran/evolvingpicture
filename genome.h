@@ -4,7 +4,7 @@
 #define MAX_CHAR 17
 
 
-#define RANGE 100 
+#define RANGE 1000
 #define MUTATION_PROPABLITY 0.0901 /* 50 percent */
 #define MUTATION_FACTOR (RANGE * MUTATION_PROPABLITY) 
 
@@ -52,7 +52,7 @@ class genome{
         void set_fitness(int );
         void randomize_genome();
         void mutate();
-        void mutate(int percent);
+        void mutate(float percent);
         void load_from_image(int **img_ptr);
 };
 
@@ -113,14 +113,14 @@ void genome::mutate()
         }
 }
 
-void genome::mutate(int percent)
+void genome::mutate(float percent)
 {
     int i,j;
 
     for(i=0; i<x; i++)
         for(j=0; j<y; j++)
         {
-            if((rand() % RANGE) < percent)
+            if( (rand() % RANGE) < ((percent * RANGE)/100) )
             {
                 *(genome_ptr+ (x*i) + j) = (rand() % MAX_CHAR);
             }
@@ -156,7 +156,7 @@ class genome_operator{
         void sort_gene_pool(genome *head[], int gene_pool_size);
         void calc_fitness_of_pool(genome *head[], int gene_pool_size, genome *target_genome);
         void crossover_genepool(genome *head[], int gene_pool_size);
-        void crossover_genepool(genome *head[], int gene_pool_size, int mutation_percent);
+        void crossover_genepool(genome *head[], int gene_pool_size, float mutation_percent);
         void create_genome_pool(genome *head[], int gene_pool_size, int gene_X_size, int gene_Y_size);
 };
 
@@ -278,7 +278,7 @@ void genome_operator::crossover_genepool(genome *head[], int gene_pool_size)
     }
 }
 
-void genome_operator::crossover_genepool(genome *head[], int gene_pool_size, int mutation_percent)
+void genome_operator::crossover_genepool(genome *head[], int gene_pool_size, float mutation_percent)
 {
     for(int indx = 2; indx < gene_pool_size; indx +=  2)
     {
