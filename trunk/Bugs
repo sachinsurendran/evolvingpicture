@@ -1,0 +1,9 @@
+*(bin_img_ptr + (x*i) + j
+
+All the above type calculations are incorrect
+
+it should be 
+
+ *(bin_img_ptr + (MAX_x * y_index) + x_index)
+
+this should be fixed all throout the code.
