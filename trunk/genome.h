@@ -14,7 +14,7 @@
 #define SEGMENT_Y 23
 
 
-#define RANGE 1000
+#define RANGE 100000
 #define MUTATION_PROPABLITY 0.0901 /* 50 percent */
 #define MUTATION_FACTOR (RANGE * MUTATION_PROPABLITY) 
 
@@ -52,8 +52,9 @@ pixel_t data[]={{0, ' '},\
 class genome{
     private:
         unsigned int fitness;
-        unsigned int x,y;
-        char *genome_ptr;
+        unsigned int max_x,max_y;
+        //char *genome_ptr;
+        vector<char> genome_vec;
 
     public:
         friend class genome_operator;
@@ -68,30 +69,40 @@ class genome{
         void load_from_image(int **img_ptr);
 };
 
-
-genome::genome(int max_x, int max_y)
+#ifdef MALLOC_STYLE_GENOME
+genome::genome(int x, int y)
 {
-    x = max_x;
-    y = max_y;
+    max_x = x;
+    max_y = y;
     fitness = 65530;
     genome_ptr = (char *) malloc(max_x * max_y);
+}
+#endif /* MALLOC_STYLE_GENOME */
+
+genome::genome(int x, int y)
+{
+    max_x = x;
+    max_y = y;
+    fitness = 65530;
+    genome_vec.resize(max_x * max_y);
 }
 
 genome::~genome()
 {
-    free(genome_ptr);
     printf("Destroying Genome\n");
 }
 
+
 void genome::load_from_image(int **img_ptr)
 {
-    int i,j;
+    int x,y;
 
-    if(genome_ptr) {
-        for(i=0; i<y; i++){
-            for(j=0; j<x; j++)
+    if(!genome_vec.empty()) {
+        for(x=0; x< max_x; x++){
+            for(y=0; y<max_y; y++)
             {
-                *(genome_ptr + (x*i) + j) = (char ) ((img_ptr[i][j])/ 1000000);
+                /* The image is stored in  img[y][x] format, Hence it is loaded this way */
+                genome_vec[max_x*y + x] = (char ) ((img_ptr[y][x])/ 1000000);
                 //printf("Value = %d\n", (char ) ((img_ptr[i][j])/ 1000000));
             }
         }
@@ -101,43 +112,47 @@ void genome::load_from_image(int **img_ptr)
 }
 
 
+
 void genome::randomize_genome()
 {
-    int i,j;
+    int x,y;
     
-    for(i=0; i<y; i++)
+    for(y=0; y<max_y; y++)
     {
-        for(j=0; j<x; j++)
+        for(x=0; x<max_x; x++)
         {
-            *(genome_ptr+ (x*i) + j) = (rand() % MAX_CHAR);
+            genome_vec[(max_x*y) + x] = (rand() % MAX_CHAR);
         }
     }
 }
 
+
 void genome::mutate()
 {
-    int i,j;
+    int x,y;
 
-    for(i=0; i<x; i++)
-        for(j=0; j<y; j++)
+    for(x=0; x<max_x; x++)
+        for(y=0; y<max_y; y++)
         {
             if((rand() % RANGE) <  MUTATION_FACTOR)
             {
-                *(genome_ptr+ (x*i) + j) = (rand() % MAX_CHAR);
+                genome_vec [(max_x*y) + x] = (rand() % MAX_CHAR);
             }
         }
 }
 
+
+
 void genome::mutate(float percent)
 {
-    int i,j;
+    int x,y;
 
-    for(i=0; i<y; i++)
-        for(j=0; j<x; j++)
+    for(y=0; y<max_y; y++)
+        for(x=0; x<max_x; x++)
         {
             if( (rand() % RANGE) < ((percent * RANGE)/100) )
             {
-                *(genome_ptr+ (x*i) + j) = (rand() % MAX_CHAR);
+                genome_vec [(max_x*y) + x] = (rand() % MAX_CHAR);
             }
         }
 }
@@ -256,10 +271,11 @@ void genome_operator::calc_fitness_of_pool(vector <genome*> *head, int gene_pool
     //printf("---------------------------------\n");
 }
 
+
 void genome_operator::calculate_fitness(genome *some_genome, genome *target_genome)
 {
-    int max_x = some_genome->x;
-    int max_y = some_genome->y;
+    int max_x = some_genome->max_x;
+    int max_y = some_genome->max_y;
     int fitness = 0;
     int x, y;
 
@@ -268,7 +284,7 @@ void genome_operator::calculate_fitness(genome *some_genome, genome *target_geno
     {
         for (y = 0; y < max_x; y++)
         {
-            int diff = *(some_genome->genome_ptr + (x * max_x) + y) - *(target_genome->genome_ptr + (x * max_x) + y);
+            int diff = some_genome->genome_vec[x * max_x + y] - target_genome->genome_vec[x * max_x + y];
 
             if (diff > 0)
                 fitness += diff;
@@ -283,27 +299,6 @@ void genome_operator::calculate_fitness(genome *some_genome, genome *target_geno
     //printf("fitness = %d\n", fitness);
 }
 
-/*void genome_operator::calculate_fitness(genome some_genome, genome *target_genome)
-{
-    int max_x = some_genome.x;
-    int max_y = some_genome.y;
-    int fitness = 0;
-    int x, y;
-
-    for (x = 0; x < max_y; x++)
-    {
-        for (y = 0; y < max_x; y++)
-        {
-            int diff = *(some_genome.genome_ptr + (x * max_x) + y) - *(target_genome->genome_ptr + (x * max_x) + y);
-
-            if (diff > 0)
-                fitness += diff;
-            else
-                fitness -= diff;
-        }
-    }
-    some_genome.set_fitness(fitness);
-}*/
 
 void genome_operator::sort_gene_pool(genome *head[], int gene_pool_size)
 {
@@ -363,21 +358,21 @@ void genome_operator::sort_gene_pool(vector <genome*> *head, int gene_pool_size)
 void genome_operator::pixelize(genome *some_genome)
 {
     unsigned int indx = 0;
-    unsigned int i,j;
-    unsigned int x = some_genome->x;
-    unsigned int y = some_genome->y;
+    unsigned int x,y;
+    unsigned int max_x = some_genome->max_x;
+    unsigned int max_y = some_genome->max_y;
 
     printf("Pixelize\n");
 
-    if (some_genome->genome_ptr) 
+    if (!some_genome->genome_vec.empty()) 
     {
-        for (i=0; i<y; i++) {
-            for (j=0; j<x; j++){
+        for (y=0; y<max_y; y++) {
+            for (x=0; x<max_x; x++){
                 //printf(" some_genome->genome_ptr[%d][%d] = %d\n", i, j, (char) (* (some_genome->genome_ptr + (x*i) + j)));
                 indx = 0;
-                while(data[indx++].val != (char) (* (some_genome->genome_ptr + (x*i) + j)) && (indx <= MAX_CHAR) )
+                while((data[indx++].val != (char) (some_genome->genome_vec[(max_x*y) + x]) && (indx <= MAX_CHAR) ))
                 {
-                   ;
+                    ;
                 }
                 //printf("%02d ", indx-1);
                 if (indx == MAX_CHAR)
@@ -390,7 +385,6 @@ void genome_operator::pixelize(genome *some_genome)
         }
     }
 }
-
 
 void genome_operator::crossover_genepool(genome *head[], int gene_pool_size, float mutation_percent)
 {
@@ -434,8 +428,8 @@ void genome_operator::crossover(genome *parent_gen1,
                         genome *child_gen2)
 {
     int x=0,y=0,value,temp;
-    int max_x = parent_gen1->x;
-    int max_y = parent_gen1->y;
+    int max_x = parent_gen1->max_x;
+    int max_y = parent_gen1->max_y;
     vector <int> crossover_X;
     vector <int> crossover_Y;
     
@@ -498,8 +492,8 @@ void genome_operator::crossover(genome *parent_gen1,
 void genome_operator::crossover(genome *head[], int gene_pool_size, int parent_pool_size)
 {
     int x=0,y=0,value,temp;
-    int max_x = head[0]->x;
-    int max_y = head[0]->y;
+    int max_x = head[0]->max_x;
+    int max_y = head[0]->max_y;
     vector <int> crossover_X;
     vector <int> crossover_Y;
     
@@ -554,8 +548,8 @@ void genome_operator::crossover(genome *head[], int gene_pool_size, int parent_p
 void genome_operator::crossover(vector <genome*> *head, int gene_pool_size, int parent_pool_size)
 {
     int x=0,y=0,value,temp;
-    int max_x = head->at(0)->x;
-    int max_y = head->at(0)->y;
+    int max_x = head->at(0)->max_x;
+    int max_y = head->at(0)->max_y;
     vector <int> crossover_X;
     vector <int> crossover_Y;
     
@@ -612,14 +606,14 @@ void genome_operator::segmentSliceCopy_2D(genome *parent_gen,
 			int y1, int y2)
 {
     int pixel_x,pixel_y;
-    int max_x = parent_gen->x;
+    int max_x = parent_gen->max_x;
 
     for(pixel_y = y1; pixel_y < y2; pixel_y++)
     {
 	for(pixel_x = x1; pixel_x < x2; pixel_x++)
 	{
-	    *(child_gen->genome_ptr + (pixel_y * max_x) + pixel_x) 
-                = *(parent_gen->genome_ptr + (pixel_y * max_x) + pixel_x);
+	    child_gen->genome_vec[(pixel_y * max_x) + pixel_x]
+                = parent_gen->genome_vec[(pixel_y * max_x) + pixel_x];
 	}
     }
 }
@@ -627,8 +621,8 @@ void genome_operator::segmentSliceCopy_2D(genome *parent_gen,
 void genome_operator::backupGenePool(genome *head[], int gene_pool_size)
 {
     ofstream genePoolOnFile[gene_pool_size];
-    int max_x = head[0]->x; 
-    int max_y = head[0]->y;
+    int max_x = head[0]->max_x; 
+    int max_y = head[0]->max_y;
     for(int i=0;i<gene_pool_size;i++)
     {
 	stringstream ss;
@@ -639,18 +633,10 @@ void genome_operator::backupGenePool(genome *head[], int gene_pool_size)
 	{
 	    for(int x=0; x<max_x; x++)
 	    {
-		genePoolOnFile[i] << (int)*(head[i]->genome_ptr + (y * max_x) + x) << " ";
+		genePoolOnFile[i] << (int)(head[i]->genome_vec[(y * max_x) + x]) << " ";
 	    }
 	}
 	genePoolOnFile[i].close();
     }
 }
-
-
-
-
-
-
-
-
 
