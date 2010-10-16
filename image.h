@@ -1,9 +1,9 @@
 //#define IMG_FILE "avi.jpg"
 //#define IMG_FILE "jolla.jpg"
-//#define IMG_FILE "doku.jpg"
+#define IMG_FILE "doku.jpg"
 //#define IMG_FILE "dracis.jpg"
 //#define IMG_FILE "nursery.jpg"
-#define IMG_FILE "icom.jpg"
+//#define IMG_FILE "icom.jpg"
 
 
 inline char pixelize(int i) {

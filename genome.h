@@ -364,8 +364,8 @@ void genome_operator::pixelize(genome *some_genome)
 {
     unsigned int indx = 0;
     unsigned int i,j;
-    int x = some_genome->x;
-    int y = some_genome->y;
+    unsigned int x = some_genome->x;
+    unsigned int y = some_genome->y;
 
     printf("Pixelize\n");
 
