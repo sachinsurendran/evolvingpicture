@@ -362,8 +362,8 @@ void genome_operator::sort_gene_pool(vector <genome*> *head, int gene_pool_size)
 
 void genome_operator::pixelize(genome *some_genome)
 {
-    unsigned char indx = 0;
-    unsigned char i,j;
+    unsigned int indx = 0;
+    unsigned int i,j;
     int x = some_genome->x;
     int y = some_genome->y;
 
@@ -377,7 +377,7 @@ void genome_operator::pixelize(genome *some_genome)
                 indx = 0;
                 while(data[indx++].val != (char) (* (some_genome->genome_ptr + (x*i) + j)) && (indx <= MAX_CHAR) )
                 {
-                    ;
+                   ;
                 }
                 //printf("%02d ", indx-1);
                 if (indx == MAX_CHAR)
